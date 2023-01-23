@@ -10,9 +10,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { MobileDatePicker } from '@mui/x-date-pickers/MobileDatePicker';
 import { getBirthToString } from 'utils/dateToString';
-import { memberApi } from 'apis/member/member-api';
 import { getFirestore, addDoc, collection } from 'firebase/firestore';
-import { async } from '@firebase/util';
 
 const dbService = getFirestore();
 
@@ -47,10 +45,6 @@ export default function AlertDialog() {
 
   const handleCreateMemberApi = async () => {
     try {
-      // await memberApi.createMember({
-      //   name: userName,
-      //   birth: userBirth,
-      // });
       await addDoc(collection(dbService, 'Member'), {
         name: userName,
         birth: userBirth,

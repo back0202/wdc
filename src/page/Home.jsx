@@ -9,7 +9,6 @@ import List from '@mui/material/List';
 import MemberAdd from '../components/MemberAdd';
 import MemberUpdate from '../components/MemberUpdate';
 import MemberDelete from '../components/MemberDelete';
-import { memberApi } from 'apis/member/member-api';
 import { collection, onSnapshot, getFirestore } from 'firebase/firestore';
 
 const dbService = getFirestore();
@@ -54,15 +53,6 @@ export default function Home({ userObject }) {
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
-
-  const getAllMember = async () => {
-    const allMember = await memberApi.getMember();
-    setMember([...allMember]);
-  };
-
-  useEffect(() => {
-    console.log(member);
-  }, [member]);
 
   useEffect(() => {
     onSnapshot(collection(dbService, 'Member'), snapShot => {
