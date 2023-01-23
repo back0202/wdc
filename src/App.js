@@ -7,7 +7,7 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  
+
   height: 100vh;
 
   justify-content: center;
@@ -16,10 +16,12 @@ const Container = styled.div`
 function App() {
   const [init, setInit] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userObject, setUserObject] = useState(null);
   useEffect(() => {
     authService.onAuthStateChanged(user => {
       if (user) {
         setIsLoggedIn(true);
+        setUserObject(user);
       } else {
         setIsLoggedIn(false);
       }
@@ -28,7 +30,11 @@ function App() {
   }, []);
   return (
     <Container>
-      {init ? <AppRouter isLoggedIn={isLoggedIn} /> : 'loding'}
+      {init ? (
+        <AppRouter isLoggedIn={isLoggedIn} userObject={userObject} />
+      ) : (
+        'loding'
+      )}
     </Container>
   );
 }
