@@ -5,10 +5,11 @@ import Tab from '@mui/material/Tab';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import ItemList from 'components/ItemList';
-
-
+import { useRef } from 'react';
+import { getText } from 'apis/naverOcr';
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
+
 
   return (
     <div
@@ -42,7 +43,11 @@ function a11yProps(index) {
 
 export default function BasicTabs() {
   const [value, setValue] = React.useState(0);
-
+  const Ref = useRef()
+  const handleUpload = (e) => {
+    let file = e.target.files[0]
+    getText(file)
+  }
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
@@ -62,6 +67,8 @@ export default function BasicTabs() {
       <TabPanel value={value} index={1}>
         <ItemList />
       </TabPanel>
+      <input type="file" ref={Ref} onChange={handleUpload} />
+      <button onClick={() => { Ref.current?.click() }}>버튼</button>
     </Box>
   );
 }
