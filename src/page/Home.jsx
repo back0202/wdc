@@ -55,6 +55,7 @@ export default function Home({ userObject }) {
   const [value, setValue] = useState(0);
   const [member, setMember] = useState([]);
   const [attachment, setAttachment] = useState();
+  const [naverOcrData, setNaverOcrData] = useState([]);
   const Ref = useRef();
   const handleUpload = e => {
     let file = e.target.files[0];
@@ -74,6 +75,8 @@ export default function Home({ userObject }) {
       axiosConfig,
     );
     console.log(response);
+
+    return response;
   };
 
   const handleApiImage = async e => {
@@ -84,8 +87,14 @@ export default function Home({ userObject }) {
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = () => {
+      console.log(reader.result.split(',')[1], "reader.result.split(',')[1]");
       setAttachment(reader.result.split(',')[1]);
     };
+
+    const response = await uploadImage();
+
+    console.log(response.data.data);
+    setNaverOcrData(response.data.data);
   };
 
   const handleApi = async () => {
@@ -164,7 +173,21 @@ export default function Home({ userObject }) {
           </ItemList>
         </List>
       </TabPanel>
-      <BasicSpeedDial />
+      {naverOcrData.length > 0 || <BasicSpeedDial onChange={handleApiImage} />}
+      {naverOcrData.length > 0 && (
+        <div
+          style={{
+            position: 'fixed',
+            background: '#Fdfdfd',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+          }}
+        >
+          출석등록
+        </div>
+      )}
     </Box>
   );
 }
