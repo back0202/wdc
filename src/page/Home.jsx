@@ -12,12 +12,13 @@ import MemberAdd from '../components/MemberAdd';
 import MemberUpdate from '../components/MemberUpdate';
 import MemberDelete from '../components/MemberDelete';
 import { collection, onSnapshot, getFirestore } from 'firebase/firestore';
+import { async } from '@firebase/util';
+import axios from 'axios';
 
 const dbService = getFirestore();
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
-
 
   return (
     <div
@@ -48,15 +49,56 @@ function a11yProps(index) {
     'aria-controls': `simple-tabpanel-${index}`,
   };
 }
-  
+
 export default function Home({ userObject }) {
   const [value, setValue] = useState(0);
   const [member, setMember] = useState([]);
-  const Ref = useRef()
-  const handleUpload = (e) => {
-    let file = e.target.files[0]
-    getText(file)
-  }
+  const [attachment, setAttachment] = useState();
+  const Ref = useRef();
+  const handleUpload = e => {
+    let file = e.target.files[0];
+    console.log(file, 'file');
+    getText(file);
+  };
+
+  const uploadImage = async () => {
+    let axiosConfig = {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    };
+    const response = await axios.get(
+      'http://localhost:8080/api/naver',
+      axiosConfig,
+    );
+    console.log(response);
+  };
+
+  const handleApiImage = async e => {
+    let file = e.target.files[0];
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      setAttachment(reader.result.split(',')[1]);
+    };
+  };
+
+  const handleApi = async () => {
+    const userList = await axios
+      .get('http://localhost:8080/api/test')
+      .then(response => {
+        console.log(response, 'response');
+        return response;
+      })
+      .catch(error => {
+        console.log(error);
+      });
+    console.log(userList);
+  };
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -122,8 +164,6 @@ export default function Home({ userObject }) {
           </ItemList>
         </List>
       </TabPanel>
-      <input type="file" ref={Ref} onChange={handleUpload} />
-      <button onClick={() => { Ref.current?.click() }}>버튼</button>
     </Box>
   );
 }
