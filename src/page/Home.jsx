@@ -10,6 +10,8 @@ import MemberAdd from '../components/MemberAdd';
 import MemberUpdate from '../components/MemberUpdate';
 import MemberDelete from '../components/MemberDelete';
 import { collection, onSnapshot, getFirestore } from 'firebase/firestore';
+import BasicSpeedDial from '../components/SpeedDial';
+
 
 const dbService = getFirestore();
 
@@ -62,6 +64,7 @@ export default function Home({ userObject }) {
       }));
       setMember(memberList);
     });
+
   }, []);
 
   return (
@@ -82,7 +85,7 @@ export default function Home({ userObject }) {
         <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
           {member &&
             member.map(element => {
-              console.log(element);
+
               return (
                 <ItemList
                   id={element.id}
@@ -114,6 +117,7 @@ export default function Home({ userObject }) {
           </ItemList>
         </List>
       </TabPanel>
+      < BasicSpeedDial />
     </Box>
   );
 }

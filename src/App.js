@@ -1,17 +1,8 @@
 import { authService } from './firebase';
 import AppRouter from './components/Router/Router';
 import { useState, useEffect } from 'react';
-import styled from 'styled-components';
 
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 
-  height: 100vh;
-
-  justify-content: center;
-`;
 
 function App() {
   const [init, setInit] = useState(false);
@@ -29,13 +20,13 @@ function App() {
     });
   }, []);
   return (
-    <Container>
+    <div>
       {init ? (
         <AppRouter isLoggedIn={isLoggedIn} userObject={userObject} />
       ) : (
         'loding'
       )}
-    </Container>
+    </div>
   );
 }
 
