@@ -5,6 +5,16 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
 } from 'firebase/auth';
+import styled from 'styled-components';
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  height: 100vh;
+
+  justify-content: center;
+`;
 
 function Auth() {
   const [email, setEmail] = useState('');
@@ -39,7 +49,7 @@ function Auth() {
   };
 
   return (
-    <>
+    <Container>
       <TextField
         id="standard-required"
         type="email"
@@ -65,7 +75,7 @@ function Auth() {
       <Button variant="text" color="secondary" onClick={toggleAuth}>
         {auth === '로그인' ? '회원가입' : '로그인'}
       </Button>
-    </>
+    </Container>
   );
 }
 

@@ -14,6 +14,7 @@ import MemberDelete from '../components/MemberDelete';
 import { collection, onSnapshot, getFirestore } from 'firebase/firestore';
 import { async } from '@firebase/util';
 import axios from 'axios';
+import BasicSpeedDial from '../components/SpeedDial';
 
 const dbService = getFirestore();
 
@@ -132,7 +133,6 @@ export default function Home({ userObject }) {
         <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
           {member &&
             member.map(element => {
-              console.log(element);
               return (
                 <ItemList
                   id={element.id}
@@ -164,6 +164,7 @@ export default function Home({ userObject }) {
           </ItemList>
         </List>
       </TabPanel>
+      <BasicSpeedDial />
     </Box>
   );
 }
