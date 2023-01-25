@@ -11,12 +11,17 @@ import List from '@mui/material/List';
 import MemberAdd from '../components/MemberAdd';
 import MemberUpdate from '../components/MemberUpdate';
 import MemberDelete from '../components/MemberDelete';
-import { collection, onSnapshot, getFirestore } from 'firebase/firestore';
+import { collection, onSnapshot, getFirestore, getDocs } from 'firebase/firestore';
 import { async } from '@firebase/util';
 import axios from 'axios';
 import BasicSpeedDial from '../components/SpeedDial';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 
-const dbService = getFirestore();
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -52,80 +57,149 @@ function a11yProps(index) {
 }
 
 export default function Home({ userObject }) {
+  const [open, setOpen] = useState(false);
+  const [dbData, setDbData] = useState([]);
+  const [inputAttend, setInputAttend] = useState([])
+  const [attendDate, setAttendDate] = useState()
+
+  const Ref = useRef()
+  const onClickAttend = async () => {
+
+    const includeDb = dbData.filter((x) => {
+      return inputAttend.includes(x.name)
+    })
+
+    includeDb.map(async (x) => {
+      await axios.patch(`http://localhost:3000/members/${x.id}`, { attend: [...x.attend, attendDate] })
+
+    })
+    setDbData([])
+    setInputAttend([])
+    setAttendDate("")
+    const a = await axios.get("http://localhost:3000/members")
+    setMember(a.data)
+    const today = new Date()
+    const year = today.getFullYear()
+    const month = today.getMonth()
+    const day = today.getDate()
+
+    const getUser = async () => {
+      const userList = await axios.get("http://localhost:3000/members")
+
+      const attendList = userList.data.filter((x) => {
+
+        const isAttend = x.attend.filter((y) => {
+          const first = new Date(`${year}-${month + 1}-${day}`)
+          const last = new Date(`${year}-${month + 1}-${day - 21}`)
+          const attendDay = new Date(y)
+
+          return last <= attendDay && attendDay <= first
+
+        })
+
+        return isAttend.length === 0
+
+      })
+
+      setNotAttend(attendList)
+    }
+    getUser()
+
+  }
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
   const [value, setValue] = useState(0);
   const [member, setMember] = useState([]);
-  const [attachment, setAttachment] = useState();
+  const [notAttend, setNotAttend] = useState([])
   const [naverOcrData, setNaverOcrData] = useState([]);
-  const Ref = useRef();
-  const handleUpload = e => {
-    let file = e.target.files[0];
-    console.log(file, 'file');
-    getText(file);
-  };
 
-  const uploadImage = async () => {
-    let axiosConfig = {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-    };
-    const response = await axios.get(
-      'http://localhost:8080/api/naver',
-      axiosConfig,
-    );
-    console.log(response);
 
-    return response;
-  };
+
+  useEffect(() => {
+    const today = new Date()
+    const year = today.getFullYear()
+    const month = today.getMonth()
+    const day = today.getDate()
+
+    const getUser = async () => {
+      const userList = await axios.get("http://localhost:3000/members")
+      const attendList = userList.data.filter((x) => {
+        const isAttend = x.attend.filter((y) => {
+          const first = new Date(`${year}-${month + 1}-${day}`)
+          const last = new Date(`${year}-${month + 1}-${day - 21}`)
+          const attendDay = new Date(y)
+
+          return last <= attendDay && attendDay <= first
+
+        })
+        return isAttend.length === 0
+
+      })
+
+      setNotAttend(attendList)
+    }
+    getUser()
+  }, [])
+
+
 
   const handleApiImage = async e => {
-    let file = e.target.files[0];
-    const formData = new FormData();
-    formData.append('file', file);
+    const a = await axios.get("http://localhost:3000/members")
+    setDbData(a.data)
 
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => {
-      console.log(reader.result.split(',')[1], "reader.result.split(',')[1]");
-      setAttachment(reader.result.split(',')[1]);
-    };
-
-    const response = await uploadImage();
-
-    console.log(response.data.data);
-    setNaverOcrData(response.data.data);
+    handleClickOpen()
   };
 
-  const handleApi = async () => {
-    const userList = await axios
-      .get('http://localhost:8080/api/test')
-      .then(response => {
-        console.log(response, 'response');
-        return response;
-      })
-      .catch(error => {
-        console.log(error);
-      });
-    console.log(userList);
-  };
+
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
 
   useEffect(() => {
-    onSnapshot(collection(dbService, 'Member'), snapShot => {
-      const memberList = snapShot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setMember(memberList);
-    });
+    const getDbData = async () => {
+      const a = await axios.get("http://localhost:3000/members")
+
+      setMember(a.data)
+    }
+    getDbData()
+
   }, []);
 
   return (
     <Box sx={{ width: '100%' }}>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"출석체크"}
+        </DialogTitle>
+        <DialogContent>
+          <div><input type="date" onChange={(e) => {
+            setAttendDate(e.target.value)
+          }} /></div>
+
+          <input type="text" ref={Ref} />
+          <button onClick={() => setInputAttend((prev => [...prev, Ref.current.value]))}>출석</button>
+          {inputAttend.map((x) => {
+            return <div key={x}>{x}</div>
+          })}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>Disagree</Button>
+          <Button onClick={() => { handleClose(); onClickAttend() }} autoFocus>
+            Agree
+          </Button>
+        </DialogActions>
+      </Dialog>
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tabs
           value={value}
@@ -140,7 +214,7 @@ export default function Home({ userObject }) {
       <TabPanel value={value} index={0}>
         <MemberAdd />
         <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
-          {member &&
+          {member.length > 0 &&
             member.map(element => {
               return (
                 <ItemList
@@ -167,27 +241,19 @@ export default function Home({ userObject }) {
       </TabPanel>
       <TabPanel value={value} index={1}>
         <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
-          <ItemList name="뉴진스" birthday="2022.01.02">
-            <button>수정</button>
-            <button>삭제</button>
-          </ItemList>
+          {notAttend && notAttend.map((x) => {
+            return <ItemList name={x.name} birthday={x.birth}>
+              <button>수정</button>
+              <button>삭제</button>
+            </ItemList>
+          })}
+
         </List>
       </TabPanel>
-      {naverOcrData.length > 0 || <BasicSpeedDial onChange={handleApiImage} />}
-      {naverOcrData.length > 0 && (
-        <div
-          style={{
-            position: 'fixed',
-            background: '#Fdfdfd',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-          }}
-        >
-          출석등록
-        </div>
-      )}
-    </Box>
+
+      {naverOcrData.length > 0 || <BasicSpeedDial onClick={handleApiImage} />}
+
+
+    </Box >
   );
 }
