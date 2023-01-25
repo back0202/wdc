@@ -1,23 +1,31 @@
-import logo from './logo.svg';
-import './App.css';
+import { authService } from './firebase';
+import AppRouter from './components/Router/Router';
+import { useState, useEffect } from 'react';
+
+
 
 function App() {
+  const [init, setInit] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userObject, setUserObject] = useState(null);
+  useEffect(() => {
+    authService.onAuthStateChanged(user => {
+      if (user) {
+        setIsLoggedIn(true);
+        setUserObject(user);
+      } else {
+        setIsLoggedIn(false);
+      }
+      setInit(true);
+    });
+  }, []);
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      {init ? (
+        <AppRouter isLoggedIn={isLoggedIn} userObject={userObject} />
+      ) : (
+        'loding'
+      )}
     </div>
   );
 }
